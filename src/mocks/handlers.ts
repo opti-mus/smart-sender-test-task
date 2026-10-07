@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse, type PathParams } from 'msw'
+import { http, HttpResponse, type PathParams } from 'msw'
 import type { LoginUserType } from '../api/auth/login'
 import type { LoginUserTokenType } from '../api/auth/token'
 import { clientAPI } from '../api/client'
@@ -80,13 +80,12 @@ export const handlers = [
     }),
     http.post<PathParams, LoginUserType>('/auth/login', async ({ request }) => {
         const error = validateHeaders(request)
-        await delay(1000)
+
         if (error) {
             return error
         }
 
         const newLogin = await request.clone().json()
-        console.log('@newLogin', newLogin)
         if (newLogin?.email && newLogin.email.trim() !== 'example@example.com') {
             return errors.validation({ email: ['The email must be a incorrect.'] })
         }
@@ -154,7 +153,6 @@ export const handlers = [
 
             return errors.unauthenticated()
         }
-        await delay(1000)
         const url = new URL(request.url)
 
         const page = Number(url.searchParams.get('page')) || 1

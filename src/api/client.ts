@@ -48,7 +48,7 @@ export class ClientAPI {
 
     private setupInterceptors() {
         this.api.interceptors.request.use(async (config: RetryableRequestConfig) => {
-            // Новые запросы ждут уже идущую ротацию, чтобы не уйти со старым токеном
+            // New requests wait for an in-flight rotation so they don't go out with a stale token
             if (this.rotatePromise) {
                 await this.rotatePromise.catch(() => undefined)
             }
@@ -56,7 +56,6 @@ export class ClientAPI {
                 config.headers['X-CSRF-TOKEN'] = this.csrf
 
             }
-            console.log('@config', config)
             config._authVersion = this.authVersion
 
             config.headers['X-Requested-With'] = 'XMLHttpRequest'
@@ -78,7 +77,7 @@ export class ClientAPI {
                     return Promise.reject(error)
                 }
 
-                // Повторный 401 после ротации — сессию уже не восстановить
+                // A repeated 401 after rotation means the session can't be restored
                 if (originalRequest._retry) {
                     this.logout()
                     return Promise.reject(error)
@@ -86,7 +85,7 @@ export class ClientAPI {
 
                 originalRequest._retry = true
 
-                // Если токен обновили уже после отправки этого запроса, ротация не нужна — просто повторяем
+                // If the token was refreshed after this request was sent, skip rotation and just retry
                 if (originalRequest._authVersion === this.authVersion) {
                     try {
                         await this.rotateOnce()
@@ -102,7 +101,7 @@ export class ClientAPI {
     }
 
     public logout() {
-        // Параллельные запросы могут упасть одновременно — завершаем сессию один раз
+        // Parallel requests may fail at the same time, so end the session only once
         if (!this.isAuthenticated) return
 
         this.isAuthenticated = false

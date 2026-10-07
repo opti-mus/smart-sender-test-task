@@ -20,8 +20,8 @@ export const loginUserToken = async (data: LoginUserTokenType) => {
 
 }
 export const rotateAuthToken = async (data: Pick<LoginUserTokenType, 'fingerprint'>) => {
-    // Отдельный axios без интерцепторов: 401 от rotate не должен снова запускать rotate.
-    // Ошибку не глушим — клиент должен узнать, что rotate не удался
+    // Plain axios without interceptors: a 401 from rotate must not trigger another rotate.
+    // Don't swallow the error, the client needs to know that rotate failed
     const response = await axios.post('/auth/token/rotate', data, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
