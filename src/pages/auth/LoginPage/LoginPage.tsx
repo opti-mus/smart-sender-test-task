@@ -33,6 +33,9 @@ export const LoginPage = () => {
         data: loginData
     } = useMutation({
         mutationFn: loginUser,
+        onSuccess: () => {
+            setErrors({})
+        },
         onError: error => {
             const apiError = getApiError(error)
 
