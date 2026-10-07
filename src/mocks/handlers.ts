@@ -86,11 +86,22 @@ export const handlers = [
         }
 
         const newLogin = await request.clone().json()
+
+        if (!newLogin?.email) {
+            return errors.validation({ email: ['The email field is required.'] })
+        }
+        if (!newLogin?.password) {
+            return errors.validation({ password: ['The password field is required.'] })
+        }
+        if (!newLogin?.fingerprint) {
+            return errors.validation({ fingerprint: ['The fingerprint field is required.'] })
+        }
+
         if (newLogin?.email && newLogin.email.trim() !== 'example@example.com') {
-            return errors.validation({ email: ['The email must be a incorrect.'] })
+            return errors.validation({ email: ['The email is incorrect.'] })
         }
         if (newLogin?.password && newLogin.password.trim() !== 'String123') {
-            return errors.validation({ password: ['The password must be a incorrect.'] })
+            return errors.validation({ password: ['The password is incorrect.'] })
         }
         if (newLogin?.fingerprint.trim() === '') {
             return errors.validation({ fingerprint: ['The fingerprint must be a valid.'] })
